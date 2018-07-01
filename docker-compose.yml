@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+    daemon:
+        build: .
+        volumes:
+            - ./src:/code
+#            - ./requirements.txt:/code/requirements.txt
+        ports:
+            - "8000:8000"
+        networks:
+            - autotrate-network
+networks:
+    autotrate-network:
+        driver: bridge
+

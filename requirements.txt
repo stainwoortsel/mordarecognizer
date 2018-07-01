@@ -1,0 +1,16 @@
+tensorflow
+numpy
+scipy
+opencv-python
+pillow
+matplotlib
+h5py
+keras
+sanic
+pyee
+asyncpg
+pytest
+pyyaml
+aiosqlite
+requests
+sanic-cors

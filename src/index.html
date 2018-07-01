@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="description" content="Пример распознания объектов, в основном, людей с помощью нейросети"/>
+    <meta name="keywords" content="*"/>
+
+    <meta name="pinterest" content="nopin"/>
+
+    <meta property="og:title" content="НС в действии"/>
+    <meta property="og:image" content=""/>
+    <meta property="og:description" content="Пример распознания объектов, в основном, людей с помощью нейросети"/>
+    <meta property="og:site_name" content=""/>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>НС в действии</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-rc.2/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+body, html { padding: 0; box-sizing: border-box;}
+#root {
+  min-height: 80vh;
+}
+#fileform,
+#loading {
+  text-align: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff;
+}
+#fileform,
+#loading,
+#results {
+  transition: opacity 0.4s ease-in-out;
+}
+
+#fileform h2,
+#loading h2,
+#results h2 {
+  margin-bottom: 10rem;
+  text-align: center;
+}
+#results {
+  display: none;
+  opacity: 0;
+}
+
+#rec-result {
+    font-size: 21px;
+}
+#rec-result .name {
+    font-weight: bold;
+    margin-right: 1rem;
+}
+
+.image {
+}
+.image img {
+  width: 100%;
+}
+.results-controls {
+   text-align: center;
+   padding: 4rem;
+}
+input[type="file"] {
+  top: -20px;
+  bottom: -20px;
+}
+    </style>
+</head>
+<body class="">
+
+<div id="root">
+
+    <header id="top-header">
+    </header>
+
+
+    <main class="container">
+        <section id="fileform">
+		<h2>Загрузите изображение</h2>
+  <form action="/rec">
+    <div class="file-field input-field">
+      <div class="btn">
+        <span>JPG/PNG</span>
+        <input type="file" name="image">
+      </div>
+      <div class="file-path-wrapper">
+        <input class="file-path validate" type="text">
+      </div>
+    </div>
+  </form>
+
+        </section>
+        <section id="loading">
+		<h2>Подождите...</h2>
+
+    <div class="preloader-wrapper big active">
+      <div class="spinner-layer spinner-blue">
+        <div class="circle-clipper left">
+          <div class="circle"></div>
+        </div><div class="gap-patch">
+          <div class="circle"></div>
+        </div><div class="circle-clipper right">
+          <div class="circle"></div>
+        </div>
+      </div>
+
+      <div class="spinner-layer spinner-red">
+        <div class="circle-clipper left">
+          <div class="circle"></div>
+        </div><div class="gap-patch">
+          <div class="circle"></div>
+        </div><div class="circle-clipper right">
+          <div class="circle"></div>
+        </div>
+      </div>
+
+      <div class="spinner-layer spinner-yellow">
+        <div class="circle-clipper left">
+          <div class="circle"></div>
+        </div><div class="gap-patch">
+          <div class="circle"></div>
+        </div><div class="circle-clipper right">
+          <div class="circle"></div>
+        </div>
+      </div>
+
+      <div class="spinner-layer spinner-green">
+        <div class="circle-clipper left">
+          <div class="circle"></div>
+        </div><div class="gap-patch">
+          <div class="circle"></div>
+        </div><div class="circle-clipper right">
+          <div class="circle"></div>
+        </div>
+      </div>
+    </div>
+        </section>
+        <section id="results">
+             <h2>Результаты</h2>
+
+             <h4>Кого нашли</h4>
+             <ul id="rec-result" class="collection"></ul>
+
+             <h4>Результат</h4>
+             <div id="dst-image" class="image"></div>
+
+             <h4>Исходное изображение</h4>
+             <div id="src-image" class="image"></div>
+
+		<div class="results-controls">
+			<a data-button="repeat-button" class="waves-effect waves-light btn-large"><i class="material-icons left">repeat</i> Еще раз</a>
+		</div>
+      </div>
+    </div>
+            
+        </section>
+    </main>
+
+</div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-rc.2/js/materialize.min.js"></script>
+<script>
+var theState1 = function() {
+  $('[name=image]').val('');
+  $('#loading, #results').css({opacity: 0});
+  $('#fileform').css({opacity: 1});
+  setTimeout(function() {
+    $('#results').hide();
+  }, 400);
+}
+
+var theState2 = function() {
+  $('#fileform, #results').css({opacity: 0});
+  $('#loading').css({opacity: 1});
+}
+
+
+var theState3 = function() {
+  $('#fileform, #loading').css({opacity: 0});
+  $('#results').show().css({opacity: 1});
+}
+
+
+$(function() {
+  theState1();
+
+  $('[name=image]').change(function() {
+    var data = new FormData();
+    $.each($('[name=image]')[0].files, function(i, file) {
+        data.append($('[name=image]').attr('name'), file);
+    });    
+
+    theState2();
+
+    $.ajax({
+       url: '/rec',
+       data: data,
+       cache: false,
+       contentType: false,
+       processData: false,
+       method: 'POST',
+       error: function() {
+           theState1();
+       },
+       success: function(data){
+           if(data.image) {
+              $('#dst-image').html('').append($('<img/>').attr('src', data.image));
+           }
+           if(data.source) {
+              $('#src-image').html('').append($('<img/>').attr('src', data.source));
+           }
+           if(data.result) {
+              $('#rec-result').find('.collection-item').remove();
+              $.each(data.result, function(i, item) {
+                  $('#rec-result').append('<li class="collection-item"><span class="name">' + item.name + ':</span><span class="prc">' + Math.round(item.percentage_probability) + '%</span></li>');
+              });
+           }
+
+           theState3();
+       }
+    });
+  });
+  
+  $('[data-button=repeat-button]').click(function() {
+    theState1();
+  });
+});
+
+</script>
+</body>
+</html>
+
