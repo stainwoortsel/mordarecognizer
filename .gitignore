@@ -16,6 +16,8 @@ userimg
 data
 *.png
 *.jpg
+*.jpeg
+*.JPG
 imageai-2.0.1-py3-none-any.whl
 resnet50_coco_best_v2.1.0.h5
 # Byte-compiled / optimized / DLL files
